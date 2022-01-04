@@ -1,4 +1,4 @@
-class MillstenSim:
+class MilsteinSim:
     def simulate(self):
         ...
 
