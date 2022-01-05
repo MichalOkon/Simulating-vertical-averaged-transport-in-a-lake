@@ -79,7 +79,7 @@ class Sim:
                      + self.g_function(xy_vector) * dw + 0.5 * self.g_function(xy_vector) * \
                      self.g_function_derivative(xy_vector) * (dw**2 - self.dt)
             xy_vector += dxy
-            print("xy_vector is:", xy_vector)
+            #print("xy_vector is:", xy_vector)
             w_old = w_new
             t += self.dt
         return xy_vector
