@@ -70,7 +70,7 @@ class Sim:
             # This is a vector that holds random variables for all particles in both directions at t+1
             w_new = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
             #print("w_new is", w_new)
-            dw = w_new - w_old
+            dw = (w_new - w_old) * self.dt
             if self.scheme == "Euler":
                 dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
                      + self.g_function(xy_vector) * dw
