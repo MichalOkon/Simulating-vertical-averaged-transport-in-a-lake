@@ -42,7 +42,7 @@ class Sim:
 
     def g_function_derivative(self, coordinate_vector):
         # Calculate derivative of g function
-        return self.dispersion_derivative(coordinate_vector) / (2 * self.g_function(coordinate_vector))
+        return self.dispersion_derivative(coordinate_vector) / self.g_function(coordinate_vector)
 
     @staticmethod
     def dispersion_derivative(coordinate_vector):
