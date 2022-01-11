@@ -1,7 +1,7 @@
+import matplotlib as matplotlib
 import numpy as np
+
 import matplotlib.pyplot as plt
-
-
 def plot_velocity_vector_field(n_points=10):
     x, y = np.meshgrid(np.linspace(-1, 1, n_points), np.linspace(-1, 1, n_points))
     velocity_x = y * (1 - x ** 2) / (15 + 5 * x)
@@ -31,6 +31,15 @@ def plot_dispersion(n_points=1000, axis="x"):
         plt.imshow(dispersion_y, extent=[-1, 1, -1, 1], origin='lower')
         plt.title("$D_y$")
     plt.colorbar()
+    plt.show()
+
+
+def plot_particle_movement(coords):
+    x_coords = coords[0:int(coords.shape[0] / 2)]
+    y_coords = coords[int(coords.shape[0] / 2):]
+    plt.scatter(x_coords, y_coords)
+    plt.xlim([-1, 1])
+    plt.ylim([-1, 1])
     plt.show()
 
 

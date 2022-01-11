@@ -1,4 +1,5 @@
 import numpy as np
+import plot_class
 
 
 class Sim:
@@ -32,8 +33,8 @@ class Sim:
         x = coordinate_vector[0:self.n_particles]
         y = coordinate_vector[self.n_particles:2 * self.n_particles]
         velocity = np.zeros(2 * self.n_particles, dtype=np.longdouble)
-        velocity[0:self.n_particles] = - y * (1 - x**2)
-        velocity[self.n_particles:2 * self.n_particles] = x * (1 - y**2)
+        velocity[0:self.n_particles] = - y * (1 - x ** 2)
+        velocity[self.n_particles:2 * self.n_particles] = x * (1 - y ** 2)
         return velocity / self.depth(coordinate_vector)
 
     def g_function(self, coordinate_vector):
@@ -66,20 +67,26 @@ class Sim:
         # This is a vector that holds random variables for all particles in both directions at t
         w_old = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
         print("w_old is", w_old)
+        n = 0
         while t < self.t_end:
             # This is a vector that holds random variables for all particles in both directions at t+1
             w_new = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
-            #print("w_new is", w_new)
+            # print("w_new is", w_new)
             dw = (w_new - w_old) * self.dt
             if self.scheme == "Euler":
                 dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
-                     + self.g_function(xy_vector) * dw
+                      + self.g_function(xy_vector) * dw
             elif self.scheme == "Milstein":
                 dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
-                     + self.g_function(xy_vector) * dw + 0.5 * self.g_function(xy_vector) * \
-                     self.g_function_derivative(xy_vector) * (dw**2 - self.dt)
+                      + self.g_function(xy_vector) * dw + 0.5 * self.g_function(xy_vector) * \
+                      self.g_function_derivative(xy_vector) * (dw ** 2 - self.dt)
+            else:
+                raise Warning("The scheme should be Euler or Milstein")
             xy_vector += dxy
-            #print("xy_vector is:", xy_vector)
+            if n % 100 == 0:
+                plot_class.plot_particle_movement(xy_vector)
+            # print("xy_vector is:", xy_vector)
             w_old = w_new
             t += self.dt
+            n += 1
         return xy_vector
