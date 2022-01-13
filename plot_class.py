@@ -39,14 +39,6 @@ def plot_dispersion(n_points=1000, axis="x"):
     plt.draw()
 
 
-def plot_particle_movement(coords):
-    x_coords = coords[0:int(coords.shape[0] / 2)]
-    y_coords = coords[int(coords.shape[0] / 2):]
-    sc = plt.scatter(x_coords, y_coords)
-    plt.xlim([-1, 1])
-    plt.ylim([-1, 1])
-    sc.set_offsets(x_coords, y_coords)
-
 
 def create_graph():
     n_points = 10
@@ -80,4 +72,8 @@ def create_graph():
 
 if __name__ == "__main__":
     plt.ion()
+    plot_velocity_vector_field()
+    plot_dispersion_vector()
+    plot_dispersion(axis = "x")
+    plot_dispersion(axis="y")
     anim = create_graph()
