@@ -101,4 +101,4 @@ class Sim:
             #w_old = w_new
             t += self.dt
             n += 1
-        return position_data
+        return position_data, xy_vector

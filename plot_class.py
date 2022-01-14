@@ -54,7 +54,7 @@ def create_graph():
         return [scatterplot]
 
     simulation = sim.Sim(n_particles=n_points, dt=1e-4, x0=0.1, y0=0, t_end=1e+1, scheme="Euler")
-    positions = simulation.simulate(record_count=10)
+    positions, _ = simulation.simulate(record_count=10)
 
     fig = plt.figure()
     plt.ion()

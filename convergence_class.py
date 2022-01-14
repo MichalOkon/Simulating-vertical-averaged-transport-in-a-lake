@@ -19,8 +19,8 @@ class Convergence:
         for i in range(0, n_samples):
             dt = self.dt * (i+1) / n_samples
             dummy_sim = sim.Sim(self.n_particles, dt, self.x0, self.y0, self.t_end, self.scheme)
-            xy = dummy_sim.simulate()
-            xy_log[i] = xy
+            position_data, last_position = dummy_sim.simulate()
+            xy_log[i] = last_position
             dt_log[i] = dt
         weak_error = np.mean(xy_log, axis=1) - np.mean(xy_accurate)
         return weak_error, dt_log
