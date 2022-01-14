@@ -39,7 +39,6 @@ def plot_dispersion(n_points=1000, axis="x"):
     plt.draw()
 
 
-
 def create_graph():
     n_points = 10
     col = [(np.arange(0, 255, n_points)[i], 0, 0) for i in range(n_points)]
@@ -54,8 +53,8 @@ def create_graph():
 
         return [scatterplot]
 
-    simulation = sim.Sim(n_points, 1e-4, 0.5, 0.5, 1e-1, "Euler")
-    positions = simulation.simulate()
+    simulation = sim.Sim(n_particles=n_points, dt=1e-4, x0=0.1, y0=0, t_end=1e+1, scheme="Euler")
+    positions = simulation.simulate(record_count=10)
 
     fig = plt.figure()
     plt.ion()
@@ -74,6 +73,6 @@ if __name__ == "__main__":
     plt.ion()
     plot_velocity_vector_field()
     plot_dispersion_vector()
-    plot_dispersion(axis = "x")
+    plot_dispersion(axis="x")
     plot_dispersion(axis="y")
     anim = create_graph()

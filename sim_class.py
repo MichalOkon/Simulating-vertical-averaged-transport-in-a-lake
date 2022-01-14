@@ -62,24 +62,31 @@ class Sim:
         return self.depth(coordinate_vector) * self.dispersion_derivative(coordinate_vector) + \
                self.dispersion(coordinate_vector) * self.depth_derivative()
 
-    def simulate(self):
+    def simulate(self, record_count=1):
         xy_vector = np.copy(self.xy_0)
         x_coords = xy_vector[0:int(xy_vector.shape[0] / 2)]
         y_coords = xy_vector[int(xy_vector.shape[0] / 2):]
         t = 0
         # This is a vector that holds random variables for all particles in both directions at t
-        w_old = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
+        w_old = 0
         print("w_old is", w_old)
         n = 0
         position_data = [[[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])]]
 
         while t < self.t_end:
             # This is a vector that holds random variables for all particles in both directions at t+1
-            w_new = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
+            dw = np.random.normal(loc=0.0, scale=self.dt, size=2 * self.n_particles)
+            # w_new = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
             # print("w_new is", w_new)
-            dw = (w_new - w_old) * self.dt
+            # w_new = w_old + dw
+            # dw = (w_new - w_old) * self.dt
             if self.scheme == "Euler":
-                dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
+                # velocity = self.velocity(xy_vector)
+                # hd_derivative = self.hd_derivative(xy_vector)
+                # depth = self.depth(xy_vector)
+                # g_fun = self.g_function(xy_vector)
+                # dxy = (velocity + (hd_derivative / depth)) * self.dt + g_fun * dw
+                dxy = (self.velocity(xy_vector) + (self.hd_derivative(xy_vector) / self.depth(xy_vector))) * self.dt \
                       + self.g_function(xy_vector) * dw
             elif self.scheme == "Milstein":
                 dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
@@ -88,10 +95,10 @@ class Sim:
             else:
                 raise Warning("The scheme should be Euler or Milstein")
             xy_vector += dxy
-            position_data.append([[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])])
+            if n % record_count == 0:
+                position_data.append([[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])])
             # print("xy_vector is:", xy_vector)
-            w_old = w_new
+            #w_old = w_new
             t += self.dt
             n += 1
         return position_data
-
