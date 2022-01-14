@@ -49,11 +49,11 @@ def create_graph():
         return [scatterplot]
 
     def update(i, scatterplot, positions):
-        scatterplot.set_offsets(positions[i])
-
+        scatterplot.set_offsets(positions[i+1])
+        plt.plot([positions[i][0][0], positions[i+1][0][0]], [positions[i][0][1], positions[i+1][0][1]], color="blue")
         return [scatterplot]
 
-    simulation = sim.Sim(n_particles=n_points, dt=1e-4, x0=0.1, y0=0, t_end=1e+1, scheme="Euler")
+    simulation = sim.Sim(n_particles=n_points, dt=1e-4, x0=0.5, y0=0.5, t_end=1e+1, scheme="Euler")
     positions, _ = simulation.simulate(record_count=10)
 
     fig = plt.figure()
@@ -63,7 +63,7 @@ def create_graph():
     plt.ylim([-1, 1])
     print(len(positions))
     movement_animation = anim.FuncAnimation(
-        fig, update, init_func=init, fargs=(scatterplot, positions), interval=1, frames=len(positions),
+        fig, update, init_func=init, fargs=(scatterplot, positions), interval=1, frames=len(positions)-1,
         blit=True, repeat=True)
     plt.show()
     return movement_animation
