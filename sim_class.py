@@ -1,6 +1,7 @@
 import numpy as np
 import plot_class
 import matplotlib.pyplot as plt
+from numpy.random import default_rng
 
 
 class Sim:
@@ -72,14 +73,16 @@ class Sim:
         print("w_old is", w_old)
         n = 0
         position_data = [[[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])]]
-
+        
+        rng = default_rng()
         while t < self.t_end:
             # This is a vector that holds random variables for all particles in both directions at t+1
-            dw = np.random.normal(loc=0.0, scale=self.dt, size=2 * self.n_particles)
+            #     dw = np.random.normal(loc=0.0, scale=self.dt, size=2 * self.n_particles)
             # w_new = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
             # print("w_new is", w_new)
             # w_new = w_old + dw
             # dw = (w_new - w_old) * self.dt
+            dw = np.sqrt(self.dt) * rng.standard_normal(2 * self.n_particles)
             if self.scheme == "Euler":
                 # velocity = self.velocity(xy_vector)
                 # hd_derivative = self.hd_derivative(xy_vector)
