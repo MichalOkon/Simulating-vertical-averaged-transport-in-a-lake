@@ -7,7 +7,7 @@ import sim_class as sim
 def plot_velocity_vector_field(n_points=10):
     plt.figure()
     x, y = np.meshgrid(np.linspace(-1, 1, n_points), np.linspace(-1, 1, n_points))
-    velocity_x = y * (1 - x ** 2) / (15 + 5 * x)
+    velocity_x = - y * (1 - x ** 2) / (15 + 5 * x)
     velocity_y = x * (1 - y ** 2) / (15 + 5 * x)
     plt.title("Velocity")
     plt.quiver(x, y, velocity_x, velocity_y)
@@ -40,9 +40,9 @@ def plot_dispersion(n_points=1000, axis="x"):
 
 
 def create_graph():
-    n_points = 1000
+    n_points = 100
     dt = 1e-4
-    record_count = 100
+    record_count = 10
     col = [(np.linspace(0, 255, n_points)[i], 0, 0) for i in range(n_points)]
 
     def init():
