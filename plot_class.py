@@ -39,7 +39,7 @@ def plot_dispersion(n_points=1000, axis="x"):
     plt.draw()
 
 
-def create_graph():
+def create_animation():
     n_points = 100
     dt = 1e-4
     record_count = 10
@@ -52,13 +52,14 @@ def create_graph():
 
     def update(i, scatterplot, positions):
         plt.title(f"t = {round(i * dt * record_count, 4)}")
-        plt.plot([positions[i][0][0], positions[i+1][0][0]], [positions[i][0][1], positions[i+1][0][1]], color="blue")
-        scatterplot.set_offsets(positions[i+1])
+        plt.plot([positions[i][0][0], positions[i + 1][0][0]], [positions[i][0][1], positions[i + 1][0][1]],
+                 color="blue")
+        scatterplot.set_offsets(positions[i + 1])
         return [scatterplot]
 
     simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5, t_end=1e+1, scheme="Milstein")
     positions, _ = simulation.simulate(record_count=record_count)
-
+    print(positions[0])
     fig = plt.figure()
     plt.ion()
     scatterplot = plt.scatter([], [])
@@ -66,10 +67,26 @@ def create_graph():
     plt.ylim([-1, 1])
     print(len(positions))
     movement_animation = anim.FuncAnimation(
-        fig, update, init_func=init, fargs=(scatterplot, positions), interval=10, frames=len(positions)-1,
+        fig, update, init_func=init, fargs=(scatterplot, positions), interval=10, frames=len(positions) - 1,
         blit=False, repeat=True)
     plt.show()
     return movement_animation
+
+
+def create_density_graph():
+    n_points = 5000
+    dt = 1e-4
+    simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5, t_end=1e+1, scheme="Euler")
+    _, xy_vector = simulation.simulate(record_count=0)
+    print("hello")
+    fig = plt.figure()
+    h = plt.hist2d(xy_vector[0:int(xy_vector.shape[0] / 2)], xy_vector[int(xy_vector.shape[0] / 2):], bins=20,
+                   cmap=plt.cm.BuGn_r)
+    plt.xlim([-1, 1])
+    plt.ylim([-1, 1])
+    fig.colorbar(h[3])
+    plt.title("Density of the particles after 1 second")
+    plt.draw()
 
 
 if __name__ == "__main__":
@@ -78,4 +95,5 @@ if __name__ == "__main__":
     plot_dispersion_vector()
     plot_dispersion(axis="x")
     plot_dispersion(axis="y")
-    anim = create_graph()
+    # anim = create_animation()
+    create_density_graph()

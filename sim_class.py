@@ -71,24 +71,13 @@ class Sim:
         # This is a vector that holds random variables for all particles in both directions at t
         w_old = 0
         print("w_old is", w_old)
-        n = 0
+        n = 0   
         position_data = [[[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])]]
         
         rng = default_rng()
         while t < self.t_end:
-            # This is a vector that holds random variables for all particles in both directions at t+1
-            #     dw = np.random.normal(loc=0.0, scale=self.dt, size=2 * self.n_particles)
-            # w_new = np.random.normal(loc=0.0, scale=1.0, size=2 * self.n_particles)
-            # print("w_new is", w_new)
-            # w_new = w_old + dw
-            # dw = (w_new - w_old) * self.dt
             dw = np.sqrt(self.dt) * rng.standard_normal(2 * self.n_particles)
             if self.scheme == "Euler":
-                # velocity = self.velocity(xy_vector)
-                # hd_derivative = self.hd_derivative(xy_vector)
-                # depth = self.depth(xy_vector)
-                # g_fun = self.g_function(xy_vector)
-                # dxy = (velocity + (hd_derivative / depth)) * self.dt + g_fun * dw
                 dxy = (self.velocity(xy_vector) + (self.hd_derivative(xy_vector) / self.depth(xy_vector))) * self.dt \
                       + self.g_function(xy_vector) * dw
             elif self.scheme == "Milstein":
@@ -98,7 +87,7 @@ class Sim:
             else:
                 raise Warning("The scheme should be Euler or Milstein")
             xy_vector += dxy
-            if n % record_count == 0:
+            if record_count != 0 and n % record_count == 0:
                 position_data.append([[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])])
             # print("xy_vector is:", xy_vector)
             #w_old = w_new
