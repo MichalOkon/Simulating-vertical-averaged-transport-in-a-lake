@@ -5,6 +5,8 @@ from numpy.random import default_rng
 
 
 class Sim:
+    pi = np.pi
+
     def __init__(self, n_particles, dt, x0, y0, t_end, scheme):
         # Initialize coefficients
         self.n_particles = n_particles
@@ -17,11 +19,13 @@ class Sim:
         self.xy_0[self.n_particles:2 * self.n_particles] = y0
         print("xy_0 vector is:", self.xy_0)
         self.scheme = scheme
+        self.pi = np.pi
+        self.dispersion_sin = 0
+        self.dispersion_cos = 0
 
-    @staticmethod
-    def dispersion(coordinate_vector):
+    def dispersion(self, coordinate_vector):
         # Calculate Dx and Dy dispersion coefficients for coordinates in the coordinate (xy) vector
-        return 1 + np.cos(np.pi * coordinate_vector)
+        return 1 + self.dispersion_cos
 
     def depth(self, coordinate_vector):
         # Calculate depth for coordinates in the coordinate vector. Ofc there is one depth for one pair of (x, y)
@@ -45,12 +49,11 @@ class Sim:
 
     def g_function_derivative(self, coordinate_vector):
         # Calculate derivative of g function
-        return self.dispersion_derivative(coordinate_vector) / self.g_function(coordinate_vector)
+        return self.dispersion_derivative() / self.g_function(coordinate_vector)
 
-    @staticmethod
-    def dispersion_derivative(coordinate_vector):
+    def dispersion_derivative(self):
         # Calculate derivative of dispersion coefficients
-        return - np.pi * np.sin(np.pi * coordinate_vector)
+        return - self.pi * self.dispersion_sin
 
     def depth_derivative(self):
         # Calculate derivative of depth
@@ -60,8 +63,13 @@ class Sim:
 
     def hd_derivative(self, coordinate_vector):
         # Calculate derivative of depth*dispersion with product rule
-        return self.depth(coordinate_vector) * self.dispersion_derivative(coordinate_vector) + \
+        return self.depth(coordinate_vector) * self.dispersion_derivative() + \
                self.dispersion(coordinate_vector) * self.depth_derivative()
+
+    def calculate_cos_sin(self, xy_vector):
+        inner = np.pi * xy_vector
+        self.dispersion_sin = np.sin(inner)
+        self.dispersion_cos = np.cos(inner)
 
     def simulate(self, record_count=1):
         xy_vector = np.copy(self.xy_0)
@@ -71,11 +79,13 @@ class Sim:
         # This is a vector that holds random variables for all particles in both directions at t
         w_old = 0
         print("w_old is", w_old)
-        n = 0   
+        n = 0
         position_data = [[[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])]]
-        
+
         rng = default_rng()
         while t < self.t_end:
+            self.calculate_cos_sin(xy_vector)
+
             dw = np.sqrt(self.dt) * rng.standard_normal(2 * self.n_particles)
             if self.scheme == "Euler":
                 dxy = (self.velocity(xy_vector) + (self.hd_derivative(xy_vector) / self.depth(xy_vector))) * self.dt \
@@ -90,7 +100,7 @@ class Sim:
             if record_count != 0 and n % record_count == 0:
                 position_data.append([[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])])
             # print("xy_vector is:", xy_vector)
-            #w_old = w_new
+            # w_old = w_new
             t += self.dt
             n += 1
         return position_data, xy_vector

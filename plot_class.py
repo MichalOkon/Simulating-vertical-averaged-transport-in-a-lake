@@ -74,18 +74,20 @@ def create_animation():
 
 
 def create_density_graph():
-    n_points = 5000
+    n_points = 10000
     dt = 1e-4
-    simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5, t_end=1e+1, scheme="Euler")
+    t_end = 1
+    simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5, t_end=t_end, scheme="Milstein")
     _, xy_vector = simulation.simulate(record_count=0)
     print("hello")
     fig = plt.figure()
+    print(xy_vector)
     h = plt.hist2d(xy_vector[0:int(xy_vector.shape[0] / 2)], xy_vector[int(xy_vector.shape[0] / 2):], bins=20,
                    cmap=plt.cm.BuGn_r)
     plt.xlim([-1, 1])
     plt.ylim([-1, 1])
     fig.colorbar(h[3])
-    plt.title("Density of the particles after 1 second")
+    plt.title(f"Density of the particles after {t_end} second with {n_points} particles")
     plt.draw()
 
 
