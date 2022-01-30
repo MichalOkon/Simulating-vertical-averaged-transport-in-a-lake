@@ -82,13 +82,13 @@ def create_density_graph():
     print("hello")
     fig = plt.figure()
     print(xy_vector)
-    h = plt.hist2d(xy_vector[0:int(xy_vector.shape[0] / 2)], xy_vector[int(xy_vector.shape[0] / 2):], bins=20,
+    h = plt.hist2d(xy_vector[0:int(xy_vector.shape[0] / 2)].astype('float64'), xy_vector[int(xy_vector.shape[0] / 2):].astype('float64'), weights= 2*np.ones(int(xy_vector.shape[0] / 2))/xy_vector.shape[0], bins=20,
                    cmap=plt.cm.BuGn_r)
-    plt.xlim([-1, 1])
-    plt.ylim([-1, 1])
+    plt.xlim([-1., 1.])
+    plt.ylim([-1., 1.])
     fig.colorbar(h[3])
     plt.title(f"Density of the particles after {t_end} second with {n_points} particles")
-    plt.draw()
+    plt.show()
 
 
 if __name__ == "__main__":
