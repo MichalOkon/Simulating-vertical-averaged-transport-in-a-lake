@@ -11,7 +11,7 @@ class Convergence:
         self.y0 = y0
         self.scheme = scheme
 
-    def weak_convergence(self, n_samples, dt_ratio):
+    def convergence(self, n_samples, dt_ratio):
         sim_accurate = sim.Sim(self.n_particles, self.dt*dt_ratio, self.x0, self.y0, self.t_end, self.scheme)
         xy_accurate = sim_accurate.simulate()
         xy_log = np.zeros((n_samples, 2 * self.n_particles))
@@ -22,7 +22,8 @@ class Convergence:
             position_data, last_position = dummy_sim.simulate()
             xy_log[i] = last_position
             dt_log[i] = dt
-        weak_error = np.mean(xy_log, axis=1) - np.mean(xy_accurate)
+        weak_error = np.mean(np.abs(xy_log), axis=0) - np.mean(np.abs(xy_accurate))
+        strong_error = np.mean(np.abs(xy_log - xy_accurate))
         return weak_error, dt_log
 
 
