@@ -1,6 +1,4 @@
 import numpy as np
-import plot_class
-import matplotlib.pyplot as plt
 from numpy.random import default_rng
 
 
@@ -17,7 +15,7 @@ class Sim:
         self.xy_0 = np.zeros(2 * self.n_particles, dtype=np.longdouble)
         self.xy_0[0:self.n_particles] = x0
         self.xy_0[self.n_particles:2 * self.n_particles] = y0
-        print("xy_0 vector is:", self.xy_0)
+        # print("xy_0 vector is:", self.xy_0)
         self.scheme = scheme
         self.pi = np.pi
         self.dispersion_sin = 0
@@ -71,14 +69,14 @@ class Sim:
         self.dispersion_sin = np.sin(inner)
         self.dispersion_cos = np.cos(inner)
 
-    def simulate(self, record_count=1):
+    def simulate(self, record_count=0):
         xy_vector = np.copy(self.xy_0)
         x_coords = xy_vector[0:int(xy_vector.shape[0] / 2)]
         y_coords = xy_vector[int(xy_vector.shape[0] / 2):]
         t = 0
         # This is a vector that holds random variables for all particles in both directions at t
         w_old = 0
-        print("w_old is", w_old)
+        # print("w_old is", w_old)
         n = 0
         position_data = [[[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])]]
 
