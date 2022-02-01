@@ -42,8 +42,8 @@ class Convergence:
             weak_error_log[i] = self.calculate_weak_error(last_position, xy_accurate)
             dt_log[i] = dt
 
-        plot_error(weak_error_log, dt_log, self.scheme, self.t_end, "Weak")
-        plot_error(strong_error_log, dt_log, self.scheme, self.t_end, "Strong")
+        plot_error(weak_error_log, dt_log, self.scheme, self.t_end, self.n_particles, "Weak")
+        plot_error(strong_error_log, dt_log, self.scheme, self.t_end, self.n_particles, "Strong")
 
         # print(weak_error)
         # print(strong_error)

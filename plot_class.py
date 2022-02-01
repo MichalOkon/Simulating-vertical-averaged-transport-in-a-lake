@@ -141,10 +141,10 @@ def create_3d_density_graph(n_particles, t_end, xy_vector):
     plt.pause(5000)
 
 
-def plot_error(errors, timesteps, scheme, t_end, error_type):
+def plot_error(errors, timesteps, scheme, t_end, n_particles, error_type):
     plt.figure()
     plt.plot(timesteps, errors)
-    plt.title(f"{error_type} Error versus Timestep for {scheme} scheme")
+    plt.title(f"{error_type} Error versus Timestep for {scheme} scheme \nn={n_particles}")
     plt.xlabel(f"Timestep Delta t")
     plt.ylabel(f"Absolute error at T = {t_end}")
     plt.show()
