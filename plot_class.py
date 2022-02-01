@@ -95,6 +95,8 @@ def create_density_graph(n_particles, t_end, xy_vector):
     fig.colorbar(h[3])
     plt.title(
         f"Density of the particles after {t_end} second with {n_particles} particles")
+    plt.xlabel("x")
+    plt.xlabel("y")
     plt.show()
     plt.pause(5000)
 
@@ -137,6 +139,8 @@ def create_3d_density_graph(n_particles, t_end, xy_vector):
     ax.bar3d(xpos, ypos, zpos, dx, dy, dz, color=rgba, zsort='average')
     plt.title(
         f"Density of the particles after {t_end} second with {n_particles} particles")
+    plt.xlabel("x")
+    plt.ylabel("y")
     plt.show()
     plt.pause(5000)
 
@@ -156,11 +160,11 @@ if __name__ == "__main__":
     # plot_dispersion(axis="x")
     # plot_dispersion(axis="y")
 
-    n_points = 10000
-    dt = 1e-4
-    t_end = 1
+    n_points = 20000
+    dt = 1e-3
+    t_end = 5
     simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5,
-                         t_end=t_end, scheme="Milstein")
+                         t_end=t_end, scheme="Euler")
     _, xy_vector = simulation.simulate(record_count=0)
     # anim = create_animation()
     # create_density_graph(n_points, t_end, xy_vector)
