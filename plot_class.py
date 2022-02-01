@@ -139,8 +139,8 @@ def create_3d_density_graph(n_particles, t_end, xy_vector):
     ax.bar3d(xpos, ypos, zpos, dx, dy, dz, color=rgba, zsort='average')
     plt.title(
         f"Density of the particles after {t_end} second with {n_particles} particles")
-    plt.xlabel("x")
-    plt.ylabel("y")
+    plt.xlabel("y")
+    plt.ylabel("x")
     plt.show()
     plt.pause(5000)
 
@@ -167,5 +167,5 @@ if __name__ == "__main__":
                          t_end=t_end, scheme="Euler")
     _, xy_vector = simulation.simulate(record_count=0)
     # anim = create_animation()
-    # create_density_graph(n_points, t_end, xy_vector)
-    create_3d_density_graph(n_points, t_end, xy_vector)
+    create_density_graph(n_points, t_end, xy_vector)
+    # create_3d_density_graph(n_points, t_end, xy_vector)
