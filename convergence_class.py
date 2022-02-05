@@ -29,7 +29,7 @@ class Convergence:
         print(f"Running convergence simulation 1")
         sim_accurate = sim.Sim(self.n_particles, self.dt * dt_ratio, self.x0, self.y0, self.t_end,
                                self.scheme)
-        _, accurate_last_positon = sim_accurate.simulate()
+        _, accurate_last_positon, _ = sim_accurate.simulate()
         xy_accurate = np.array([accurate_last_positon [:self.n_particles], accurate_last_positon [self.n_particles:]])
         dt_log = np.zeros(n_samples)
         weak_error_log = np.zeros(n_samples)
@@ -38,7 +38,7 @@ class Convergence:
             print(f"Running convergence simulation {i + 2}")
             dt = self.dt * (i + 1) / n_samples
             dummy_sim = sim.Sim(self.n_particles, dt, self.x0, self.y0, self.t_end, self.scheme)
-            position_data, last_position = dummy_sim.simulate()
+            position_data, last_position, _ = dummy_sim.simulate()
             xy_positions = np.array([last_position[:self.n_particles], last_position[self.n_particles:]])
            # xy_positions = [[last_position[i], last_position[int(self.n_particles / 2) + i]] for i in
             #                 range(int(self.n_particles / 2))]

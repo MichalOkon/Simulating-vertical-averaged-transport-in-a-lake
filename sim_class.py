@@ -5,7 +5,7 @@ from numpy.random import default_rng
 class Sim:
     pi = np.pi
 
-    def __init__(self, n_particles, dt, x0, y0, t_end, scheme):
+    def __init__(self, n_particles, dt, x0, y0, t_end, scheme, count_escaping_particles=False, strict_domain=True):
         # Initialize coefficients
         self.n_particles = n_particles
         self.dt = dt
@@ -20,6 +20,8 @@ class Sim:
         self.pi = np.pi
         self.dispersion_sin = 0
         self.dispersion_cos = 0
+        self.count_escaping_particles = count_escaping_particles
+        self.strict_domain = strict_domain
 
     def dispersion(self, coordinate_vector):
         # Calculate Dx and Dy dispersion coefficients for coordinates in the coordinate (xy) vector
@@ -69,6 +71,23 @@ class Sim:
         self.dispersion_sin = np.sin(inner)
         self.dispersion_cos = np.cos(inner)
 
+    @staticmethod
+    def catch_escaping_particles(x_coords, y_coords, catch=True):
+        # Checks if any of the particles left the domain, sets their coordinates to (1, 1) (stable point)
+        # and returns the number of particles that left the domain
+        x_out_of_domain = np.where(np.logical_or(x_coords < -1, x_coords > 1))
+        y_out_of_domain = np.where(np.logical_or(y_coords < -1, y_coords > 1))
+        xy_out_of_domain = np.union1d(x_out_of_domain, y_out_of_domain)
+
+        # excluded.extend(xy_out_of_domain)
+        particles_out = len(xy_out_of_domain)
+
+        if catch:
+            x_coords[xy_out_of_domain] = 1
+            y_coords[xy_out_of_domain] = 1
+
+        return particles_out
+
     def simulate(self, record_count=0):
         xy_vector = np.copy(self.xy_0)
         x_coords = xy_vector[0:int(xy_vector.shape[0] / 2)]
@@ -81,7 +100,14 @@ class Sim:
         position_data = [[[x_coords[i], y_coords[i]] for i in range(x_coords.shape[0])]]
 
         rng = default_rng()
+        number_of_particles_out = 0
         while t < self.t_end:
+
+            if self.strict_domain:
+                xy_vector = np.clip(xy_vector, -1, 1)
+            elif self.count_escaping_particles:
+                number_of_particles_out += self.catch_escaping_particles(x_coords, y_coords)
+
             self.calculate_cos_sin(xy_vector)
 
             dw = np.sqrt(self.dt) * rng.standard_normal(2 * self.n_particles)
@@ -90,7 +116,7 @@ class Sim:
                       + self.g_function(xy_vector) * dw
             elif self.scheme == "Milstein":
                 dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
-                      + self.g_function(xy_vector) * dw + + 0.5 * self.dispersion_derivative() *(dw ** 2 - self.dt)
+                      + self.g_function(xy_vector) * dw + 0.5 * self.dispersion_derivative() * (dw ** 2 - self.dt)
             else:
                 raise Warning("The scheme should be Euler or Milstein")
             xy_vector += dxy
@@ -100,4 +126,4 @@ class Sim:
             # w_old = w_new
             t += self.dt
             n += 1
-        return position_data, xy_vector
+        return position_data, xy_vector, number_of_particles_out
