@@ -90,8 +90,7 @@ class Sim:
                       + self.g_function(xy_vector) * dw
             elif self.scheme == "Milstein":
                 dxy = (self.velocity(xy_vector) + self.hd_derivative(xy_vector) / self.depth(xy_vector)) * self.dt \
-                      + self.g_function(xy_vector) * dw + 0.5 * self.g_function(xy_vector) * \
-                      self.g_function_derivative(xy_vector) * (dw ** 2 - self.dt)
+                      + self.g_function(xy_vector) * dw + + 0.5 * self.dispersion_derivative() *(dw ** 2 - self.dt)
             else:
                 raise Warning("The scheme should be Euler or Milstein")
             xy_vector += dxy
