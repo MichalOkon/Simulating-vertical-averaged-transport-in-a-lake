@@ -5,11 +5,13 @@ from numpy.random import default_rng
 class Sim:
     pi = np.pi
 
-    def __init__(self, n_particles, dt, x0, y0, t_end, scheme, domain_behavior="catch"):
+    def __init__(self, n_particles, dt, x0, y0, t_end, scheme, domain_behavior="clip", step_size=1):
         # Initialize coefficients
         self.n_particles = n_particles
         self.dt = dt
         self.t_end = t_end
+        self.n_intervals = int(t_end // dt)
+        self.step_size = step_size
         # Create a vector to hold coordinates of all particles, first n elements are x coordinates, the rest are y
         # coordinates
         self.xy_0 = np.zeros(2 * self.n_particles, dtype=np.longdouble)
@@ -21,13 +23,17 @@ class Sim:
         self.dispersion_sin = 0
         self.dispersion_cos = 0
 
-        # Either catch or clip or ignore
-        self.domain_behavior = domain_behavior
-
         self.xy_vector = np.copy(self.xy_0)
         self.x_coords = self.xy_vector[0:int(self.xy_vector.shape[0] / 2)]
         self.y_coords = self.xy_vector[int(self.xy_vector.shape[0] / 2):]
         self.excluded_particles = []
+
+        # Either catch or clip or ignore
+        self.domain_behavior = domain_behavior
+
+        self.wiener_process = default_rng(1234).normal(0, np.sqrt(self.dt),
+                                                      (self.n_intervals, 2 * self.n_particles))
+        print(self.wiener_process)
 
     def initialize_simulation(self):
         # Creating the vectors holding the current states of the simulation
@@ -35,6 +41,16 @@ class Sim:
         self.x_coords = self.xy_vector[0:int(self.xy_vector.shape[0] / 2)]
         self.y_coords = self.xy_vector[int(self.xy_vector.shape[0] / 2):]
         self.excluded_particles = []
+
+    def set_step_size(self, step_size):
+        self.step_size = step_size
+
+    def get_dw(self, step):
+        if step * self.step_size > self.n_intervals:
+            return self.wiener_process[self.step_size * (step-1):].sum(axis=0)
+        if step == 0:
+            return self.wiener_process[0]
+        return self.wiener_process[self.step_size * (step-1):step * self.step_size].sum(axis=0)
 
     def dispersion(self):
         # Calculate Dx and Dy dispersion coefficients for coordinates in the coordinate (xy) vector
@@ -104,29 +120,33 @@ class Sim:
     def simulate(self, record_count=0):
         t = 0
         n = 0
-
         self.initialize_simulation()
         position_data = [[[self.x_coords[i], self.y_coords[i]] for i in range(self.x_coords.shape[0])]]
 
-        rng = default_rng()
-        while t < self.t_end:
+        number_of_iterations = self.n_intervals // self.step_size
+        print(f"n intervals = {number_of_iterations}")
+        time_step = self.dt * self.step_size
+        while n < number_of_iterations:
 
+            # print(time_step)
             self.calculate_cos_sin()
-            dw = np.sqrt(self.dt) * rng.standard_normal(2 * self.n_particles)
 
+            dw = self.get_dw(n)
+            # print(dw)
             if self.scheme == "Euler":
-                dxy = (self.velocity() + (self.hd_derivative() / self.depth())) * self.dt \
+                dxy = (self.velocity() + (self.hd_derivative() / self.depth())) * time_step \
                       + self.g_function() * dw
             elif self.scheme == "Milstein":
-                dxy = (self.velocity() + self.hd_derivative() / self.depth()) * self.dt \
-                      + self.g_function() * dw + 0.5 * self.dispersion_derivative() * (dw ** 2 - self.dt)
+                dxy = (self.velocity() + self.hd_derivative() / self.depth()) * time_step \
+                      + self.g_function() * dw + 0.5 * self.dispersion_derivative() * (
+                              dw ** 2 - time_step)
             else:
                 raise Warning("The scheme should be Euler or Milstein")
-
             self.xy_vector += dxy
-
             if record_count != 0 and n % record_count == 0:
-                position_data.append([[self.x_coords[i], self.y_coords[i]] for i in range(self.x_coords.shape[0])])
+                position_data.append(
+                    [[self.x_coords[i], self.y_coords[i]] for i in range(self.x_coords.shape[0])])
+
 
             if self.domain_behavior == "clip":
                 self.xy_vector = np.clip(self.xy_vector, -1, 1)
@@ -134,7 +154,7 @@ class Sim:
                 self.catch_escaping_particles()
 
             #print(self.xy_vector)
-            t += self.dt
+            t += time_step
             n += 1
 
         print(f"excluded particles: {self.excluded_particles}")

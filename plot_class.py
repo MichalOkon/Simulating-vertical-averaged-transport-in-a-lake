@@ -48,7 +48,7 @@ def plot_dispersion(n_points=1000, axis="x"):
 def create_animation():
     plt.clf()
     n_points = 100
-    dt = 1e-4
+    dt = 1e-3
     record_count = 10
     col = [(np.linspace(0, 255, n_points)[i], 0, 0) for i in range(n_points)]
 
@@ -65,8 +65,8 @@ def create_animation():
         scatterplot.set_offsets(positions[i + 1])
         return [scatterplot]
 
-    simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5, t_end=1e+1, scheme="Milstein")
-    positions, _ = simulation.simulate(record_count=record_count)
+    simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5, t_end=1, scheme="Euler", domain_behavior="ignore")
+    positions, _, _ = simulation.simulate(record_count=record_count)
     print(positions[0])
     fig = plt.figure()
     plt.ion()
@@ -76,9 +76,10 @@ def create_animation():
     print(len(positions))
     movement_animation = anim.FuncAnimation(
         fig, update, init_func=init, fargs=(scatterplot, positions),
-        interval=10, frames=len(positions) - 1,
+        interval=100, frames=len(positions) - 1,
         blit=False, repeat=True)
     plt.show()
+    plt.pause(5000)
     return movement_animation
 
 
@@ -171,17 +172,17 @@ def plot_final_density():
     plt.show()
 
 if __name__ == "__main__":
-    # plot_velocity_vector_field()
-    # plot_dispersion_vector()
+    #plot_velocity_vector_field()
+    #plot_dispersion_vector()
     # plot_dispersion(axis="x")
     # plot_dispersion(axis="y")
-    plot_final_density()
-    #n_points = 20000
-    #dt = 1e-3
-    #t_end = 5
-    #simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5,
-    #                     t_end=t_end, scheme="Euler")
-    #_, xy_vector = simulation.simulate(record_count=0)
-    # anim = create_animation()
-    # create_density_graph(n_points, t_end, xy_vector)
+    # plot_final_density()
+    n_points = 10000
+    dt = 0.001
+    t_end = 1
+    simulation = sim.Sim(n_particles=n_points, dt=dt, x0=0.5, y0=0.5,
+                         t_end=t_end, scheme="Euler")
+    _, xy_vector, _ = simulation.simulate(record_count=0)
+    #anim = create_animation()
+    create_density_graph(n_points, t_end, xy_vector)
     # create_3d_density_graph(n_points, t_end, xy_vector)
