@@ -1,6 +1,5 @@
 import convergence_class as conv
 import sim_class as sim
-import numpy as np
 
 # sim = sim.Sim(10, 1e-4, 0.5, 0.5, 1e2, "Euler")
 # xy = sim.simulate()
