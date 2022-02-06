@@ -5,7 +5,7 @@ from numpy.random import default_rng
 class Sim:
     pi = np.pi
 
-    def __init__(self, n_particles, dt, x0, y0, t_end, scheme, domain_behavior = "catch"):
+    def __init__(self, n_particles, dt, x0, y0, t_end, scheme, domain_behavior="catch"):
         # Initialize coefficients
         self.n_particles = n_particles
         self.dt = dt
@@ -20,13 +20,21 @@ class Sim:
         self.pi = np.pi
         self.dispersion_sin = 0
         self.dispersion_cos = 0
+
+        # Either catch or clip or ignore
+        self.domain_behavior = domain_behavior
+
+        self.xy_vector = np.copy(self.xy_0)
+        self.x_coords = self.xy_vector[0:int(self.xy_vector.shape[0] / 2)]
+        self.y_coords = self.xy_vector[int(self.xy_vector.shape[0] / 2):]
+        self.excluded_particles = []
+
+    def initialize_simulation(self):
         # Creating the vectors holding the current states of the simulation
         self.xy_vector = np.copy(self.xy_0)
         self.x_coords = self.xy_vector[0:int(self.xy_vector.shape[0] / 2)]
         self.y_coords = self.xy_vector[int(self.xy_vector.shape[0] / 2):]
         self.excluded_particles = []
-        # Either catch or clip
-        self.domain_behavior = domain_behavior
 
     def dispersion(self):
         # Calculate Dx and Dy dispersion coefficients for coordinates in the coordinate (xy) vector
@@ -78,7 +86,7 @@ class Sim:
 
     def catch_escaping_particles(self, catch=True):
         # Checks if any of the particles left the domain, sets their coordinates to (1, 1) (stable point)
-        # and returns the number of particles that left the domain
+        # and returns the indices of  particles that left the domain
         x_out_of_domain = np.where(np.logical_or(self.x_coords < -1, self.x_coords > 1))
         y_out_of_domain = np.where(np.logical_or(self.y_coords < -1, self.y_coords > 1))
         xy_out_of_domain = np.union1d(x_out_of_domain, y_out_of_domain)
@@ -95,18 +103,17 @@ class Sim:
 
     def simulate(self, record_count=0):
         t = 0
-        # This is a vector that holds random variables for all particles in both directions at t
-        w_old = 0
-        # print("w_old is", w_old)
         n = 0
+
+        self.initialize_simulation()
         position_data = [[[self.x_coords[i], self.y_coords[i]] for i in range(self.x_coords.shape[0])]]
 
         rng = default_rng()
         while t < self.t_end:
 
             self.calculate_cos_sin()
-
             dw = np.sqrt(self.dt) * rng.standard_normal(2 * self.n_particles)
+
             if self.scheme == "Euler":
                 dxy = (self.velocity() + (self.hd_derivative() / self.depth())) * self.dt \
                       + self.g_function() * dw
@@ -115,17 +122,20 @@ class Sim:
                       + self.g_function() * dw + 0.5 * self.dispersion_derivative() * (dw ** 2 - self.dt)
             else:
                 raise Warning("The scheme should be Euler or Milstein")
+
             self.xy_vector += dxy
+
             if record_count != 0 and n % record_count == 0:
                 position_data.append([[self.x_coords[i], self.y_coords[i]] for i in range(self.x_coords.shape[0])])
-            # print("xy_vector is:", xy_vector)
-            # w_old = w_new
-            t += self.dt
-            n += 1
 
             if self.domain_behavior == "clip":
                 self.xy_vector = np.clip(self.xy_vector, -1, 1)
             elif self.domain_behavior == "catch":
                 self.catch_escaping_particles()
+
+            #print(self.xy_vector)
+            t += self.dt
+            n += 1
+
         print(f"excluded particles: {self.excluded_particles}")
         return position_data, self.xy_vector, self.excluded_particles
